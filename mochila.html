@@ -4,10 +4,10 @@
 
  	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
     
-    <script src="mochila.js"></script>
+    <script src="mochila2.js"></script>
 
   </head>
-  <body ng-app="todoApp" ng-controller="mochilaController as vm">
+  <body ng-app="todoApp" ng-controller="mochilaController2 as vm">
 
 	<p> Loops no array {{vm.break}}</p>
 
@@ -15,8 +15,15 @@
 
  	 <h4>{{vm.melhor}}</h4>
 
-  		{{vm.melhores}}
-  	
+  		
+
+      <div ng-repeat="mochila in vm.melhores track by $index">
+
+         {{mochila.weight}} - {{mochila.total}} - {{ mochila.itens }}
+
+  
+      </div>
+        	
 
     
   </body>

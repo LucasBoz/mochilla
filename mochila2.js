@@ -1,7 +1,7 @@
 
 
 angular.module('todoApp', [])
-  .controller('mochilaController', function() {
+  .controller('mochilaController2', function($filter) {
 
     var vm = this;
 
@@ -26,17 +26,6 @@ angular.module('todoApp', [])
     ];
 
 
-    for (var i = 0 ; i <= 20; i++) {
-
-      var objeto = {
-        id : i + 15,
-        value : Math.floor(Math.random() * 10) ,
-        weight : Math.floor(Math.random() * 10) 
-      }
-      
-      vm.objetos.push( objeto );
-
-    }
 
 
     vm.mochilas = [];
@@ -48,7 +37,8 @@ angular.module('todoApp', [])
     vm.maxWeigth = 30;
 
     vm.melhor = {
-      total : 0
+      total : 0,
+      fitness : 0
     }
 
   // PEGA O VALOR DA MOCHILA 
@@ -56,42 +46,61 @@ angular.module('todoApp', [])
 
        var total = 0;
        var weight = 0;
+
        angular.forEach( mochila.itens, function(value, key) {
-          if (value) {
-            total +=  vm.objetos[key].value;
-            weight += vm.objetos[key].weight; 
+          if (value.tem) {
+
+            total +=  vm.objetos[value.item - 1].value;
+            weight += vm.objetos[value.item - 1].weight; 
 
           }
        });
 
        mochila.total = total;
-       mochila.totalWeigth = weight;
+       mochila.weight = weight;
        
-       if (weight > vm.maxWeigth){
-        mochila.fitness = 0;
+       if (mochila.weight > 30 ) {
+          mochila.fitness = 0
        } else {
-         mochila.fitness = total  ; 
+          mochila.fitness = total + total / weight;
        }
        
        return mochila;
 
      }
     
+
+    vm.shuffleArray = function(array) {
+        for (var i = array.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+        return array;
+    }
+
+
     // CRIA OS INDIVIDUOS 
     for (var m = 0; m < vm.numeroMochilas; m++) {
 
         var array = [];
+
+        var mochila = {};
+
         for (var i = 0 ; i < vm.objetos.length; i++) {
-          
-            array[i] = Math.floor(Math.random() * 10) % 2;
-          
+            array[i] = {
+              tem : Math.floor(Math.random() * 10) % 2, 
+              item : i + 1
+            }
         }
 
         var mochila = {
-          itens : array
+          itens : vm.shuffleArray(array)
         }
 
         vm.getValue(mochila);
+
         vm.mochilas.push(mochila);
 
    }
@@ -113,7 +122,7 @@ angular.module('todoApp', [])
 
     vm.getMelhor = function(){
         for (var i = 1 ; i < vm.mochilas.length; i++) {
-          if (vm.mochilas[i].totalWeigth <= vm.maxWeigth){
+          if (vm.mochilas[i].weigth <= vm.maxWeigth){
 
             if( vm.melhor.total < vm.mochilas[i].total){
 
@@ -129,7 +138,9 @@ angular.module('todoApp', [])
      
     vm.cruza = function(mochila){
 
-      var pai = vm.mochilas[0];
+      var pai1 = angular.copy(vm.mochilas[0].itens);
+
+      var pai2 = angular.copy(mochila.itens);
 
       var filho1 = {
         itens : []
@@ -137,19 +148,33 @@ angular.module('todoApp', [])
       var filho2 = {
         itens : []
       };
-      var pontoDeDivisao = Math.floor(Math.random() * (vm.objetos.length - 1) );
 
-      for (var i = 0; i < vm.objetos.length; i++) {
-        if ( i < pontoDeDivisao) {
-          filho1.itens.push( pai.itens[i] );
-          filho2.itens.push( mochila.itens[i]);
-        } else {
-          filho2.itens.push( pai.itens[i] );
-          filho1.itens.push( mochila.itens[i]);
-        }  
+      var pontoDeDivisao1 = 5;
+      var pontoDeDivisao2 = 9;
+
+
+      var meio1 = (angular.copy(pai1)).splice(pontoDeDivisao1, pontoDeDivisao2 - pontoDeDivisao1);
+      var meio2 = (angular.copy(pai2)).splice(pontoDeDivisao1, pontoDeDivisao2 - pontoDeDivisao1);
+
+
+        
+      for (var j = meio1.length - 1; j >= 0; j--) {
+      
+        pai1.splice ( pai1.map(function(e) { return e.item; }).indexOf( meio2[j].item ) , 1 );
+
+        pai2.splice ( pai2.map(function(e) { return e.item; }).indexOf( meio1[j].item ) , 1 );
+
       }
 
-      return [ vm.getValue(filho1) , vm.getValue( filho2) ];
+      for (var i = 0 ; i < meio1.length; i++) {
+
+        pai1.splice(i + pontoDeDivisao1, 0, meio2[i]);
+        pai2.splice(i + pontoDeDivisao1, 0, meio1[i]);
+
+      }
+
+      
+      return [ vm.getValue(pai1) , vm.getValue( pai2 ) ];
     } 
 
     vm.reproduzir = function (){
@@ -165,11 +190,14 @@ angular.module('todoApp', [])
 
     }
 
+    vm.melhor = vm.mochilas[0];
+
     vm.getMelhor();
 
     vm.melhores.push( vm.mochilas[0] );
     
     vm.contador = 1;
+
     vm.break = 0;
 
     while( vm.contador < 20 ){ 
@@ -182,16 +210,17 @@ angular.module('todoApp', [])
           vm.melhores.push( vm.mochilas[0] );
 
           vm.break += 1; 
+  vm.contador += 1;
+          if ( true || vm.mochilas[0].fitness == vm.melhor.fitness ){
 
-          if ( vm.mochilas[0].fitness == vm.melhor.fitness ){
-
-              vm.contador += 1;
-
+           
+             
           } else {
 
               console.log("false = " + vm.mochilas[0].fitness  + " = " + vm.melhor.fitness );
               vm.contador = 0;
           }
+
 
 
 
