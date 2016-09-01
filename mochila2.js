@@ -149,22 +149,84 @@ angular.module('todoApp', [])
         itens : []
       };
 
-      var pontoDeDivisao1 = 5;
-      var pontoDeDivisao2 = 9;
+      var pontoDeDivisao1 = 0;
+      var pontoDeDivisao2 = 0;
+
+      while(pontoDeDivisao1 == pontoDeDivisao2){
+
+        //                                                           SE COLOCAR "-2" DA ERRADO 
+        pontoDeDivisao1 =  Math.floor(Math.random() * ( vm.objetos.length - 1 - 2 + 1)) + 2;
+        pontoDeDivisao2 =  Math.floor(Math.random() * ( vm.objetos.length - 1 - 2 + 1)) + 2;
+
+
+
+      }
+
+      if(pontoDeDivisao1 > pontoDeDivisao2){
+        var aux = pontoDeDivisao1;
+        pontoDeDivisao1 = pontoDeDivisao2;
+        pontoDeDivisao2 = aux;
+      }
+
+
+///TESTEEEEEEEEEEEEE  vvvvvvvvvvvvvvvvvvv
+
+      pai1 = [ { item  : "A" }, { item  : "B"}, { item  : "C"}, { item  : "D"}, { item  : "F"}, { item  : "E"}, { item  : "G"}];
+
+      pai2 = [ { item  : "C" }, { item  : "E"}, { item  : "G"}, { item  : "B"}, { item  : "D"}, { item  : "F"}, { item  : "A"}];
+
+      pontoDeDivisao1 = 2;
+
+      pontoDeDivisao2 = 5;
+
+
+//TESTEEEEEEEEEEEEEEEE ^^^^^^^^^^^^^^^^^^^^    
 
 
       var meio1 = (angular.copy(pai1)).splice(pontoDeDivisao1, pontoDeDivisao2 - pontoDeDivisao1);
       var meio2 = (angular.copy(pai2)).splice(pontoDeDivisao1, pontoDeDivisao2 - pontoDeDivisao1);
 
+      pai1ParteB = pai1;
+      pai2ParteB = pai2;
+
+      pai1ParteA = angular.copy( pai1ParteB.splice(0, pontoDeDivisao1) );
+
+      pai2ParteA = angular.copy( pai2ParteB.splice(0, pontoDeDivisao1));
 
         
       for (var j = meio1.length - 1; j >= 0; j--) {
       
-        pai1.splice ( pai1.map(function(e) { return e.item; }).indexOf( meio2[j].item ) , 1 );
+        //PAI 1
+        var asd = pai1ParteA.map(function(e) { return e.item; }).indexOf( meio2[j].item );
 
-        pai2.splice ( pai2.map(function(e) { return e.item; }).indexOf( meio1[j].item ) , 1 );
+        if (asd > -1){
+            pai1ParteA.splice ( asd , 1 );
+        } 
+        
+        asd =  pai1ParteB.map(function(e) { return e.item; }).indexOf( meio2[j].item );
+        if (asd > -1){
+             pai1ParteB.splice (asd  , 1 ); 
+        }
+       
+        //PAI 2
 
+         asd =   pai2ParteA.map(function(e) { return e.item; }).indexOf( meio1[j].item ) ;
+        if (asd > -1){
+            pai2ParteA.splice (asd , 1 );
+        }
+       
+        asd =  pai2ParteB.map(function(e) { return e.item; }).indexOf( meio1[j].item );
+        if (asd > -1){
+            pai2ParteB.splice ( asd , 1 );
+        }
+       
       }
+
+      pai1 = pai1ParteB.concat(  pai1ParteA );
+
+
+      pai2 = pai2ParteB.concat(  pai2ParteA );
+
 
       for (var i = 0 ; i < meio1.length; i++) {
 
@@ -173,8 +235,10 @@ angular.module('todoApp', [])
 
       }
 
-      
+
+  
       return [ vm.getValue(pai1) , vm.getValue( pai2 ) ];
+
     } 
 
     vm.reproduzir = function (){
@@ -200,7 +264,7 @@ angular.module('todoApp', [])
 
     vm.break = 0;
 
-    while( vm.contador < 20 ){ 
+    while( vm.contador < 5 ){ 
 
           vm.reproduzir();
           vm.mochilas = shellSort( vm.mochilas );
