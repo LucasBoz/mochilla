@@ -59,7 +59,7 @@ angular.module('todoApp', [])
        mochila.total = total;
        mochila.weight = weight;
        
-       if (mochila.weight > 30 ) {
+       if (mochila.weight > 30 || mochila.weight == 0) {
           mochila.fitness = 0
        } else {
           mochila.fitness = total + total / weight;
@@ -136,7 +136,7 @@ angular.module('todoApp', [])
         } 
     } 
      
-    vm.cruza = function(mochila){
+    vm.cruzaOX = function(mochila){
 
       var pai1 = angular.copy(vm.mochilas[0].itens);
 
@@ -154,11 +154,9 @@ angular.module('todoApp', [])
 
       while(pontoDeDivisao1 == pontoDeDivisao2){
 
-        //                                                           SE COLOCAR "-2" DA ERRADO 
-        pontoDeDivisao1 =  Math.floor(Math.random() * ( vm.objetos.length - 1 - 2 + 1)) + 2;
-        pontoDeDivisao2 =  Math.floor(Math.random() * ( vm.objetos.length - 1 - 2 + 1)) + 2;
-
-
+        //                                                           SE COLOCAR "-2" DA certo  
+        pontoDeDivisao1 =  Math.floor(Math.random() * ( vm.objetos.length - 2)) + 2;
+        pontoDeDivisao2 =  Math.floor(Math.random() * ( vm.objetos.length - 2)) + 2;
 
       }
 
@@ -167,20 +165,6 @@ angular.module('todoApp', [])
         pontoDeDivisao1 = pontoDeDivisao2;
         pontoDeDivisao2 = aux;
       }
-
-
-///TESTEEEEEEEEEEEEE  vvvvvvvvvvvvvvvvvvv
-
-      pai1 = [ { item  : "A" }, { item  : "B"}, { item  : "C"}, { item  : "D"}, { item  : "F"}, { item  : "E"}, { item  : "G"}];
-
-      pai2 = [ { item  : "C" }, { item  : "E"}, { item  : "G"}, { item  : "B"}, { item  : "D"}, { item  : "F"}, { item  : "A"}];
-
-      pontoDeDivisao1 = 2;
-
-      pontoDeDivisao2 = 5;
-
-
-//TESTEEEEEEEEEEEEEEEE ^^^^^^^^^^^^^^^^^^^^    
 
 
       var meio1 = (angular.copy(pai1)).splice(pontoDeDivisao1, pontoDeDivisao2 - pontoDeDivisao1);
@@ -209,7 +193,6 @@ angular.module('todoApp', [])
         }
        
         //PAI 2
-
          asd =   pai2ParteA.map(function(e) { return e.item; }).indexOf( meio1[j].item ) ;
         if (asd > -1){
             pai2ParteA.splice (asd , 1 );
@@ -235,28 +218,134 @@ angular.module('todoApp', [])
 
       }
 
+      pai1 = {
+        itens : pai1
+      }
 
+      pai2 = {
+        itens : pai2
+      }
   
       return [ vm.getValue(pai1) , vm.getValue( pai2 ) ];
 
     } 
 
-    vm.reproduzir = function (){
+    vm.cruzaCX = function( mochila ){
+      var pai1 = vm.mochilas[0].itens;
+      var pai2 = mochila.itens;
 
-      vm.mochilasCopy = angular.copy(vm.mochilas);
+      var repetiu = false;
 
-      for (var i = vm.mochilasCopy.length - 1; i > 0; i--) {
+      var toSearch = null;
 
-        var filhos = vm.cruza(  vm.mochilasCopy[i]);
-        vm.mochilas.push ( filhos[0] );
-        vm.mochilas.push ( filhos[1] );
+      filho = new Array( pai1.length );
+
+      while ( !repetiu ){
+        if (!toSearch) {
+          filho[0] = pai1[0];
+          toSearch = pai2[0];
+        }else{
+
+          for (var i = 0; i < pai1.length ; i++) {
+            if (toSearch.id == pai1[i].id) {
+              filho[i] = toSearch;
+              pos = buscarNoFilho( pai2[i], filho );
+              if ( pos > -1 ) { // foi encontrado
+                repetiu = true;
+              } else {
+                toSearch = pai2[i];
+              }
+
+                //Verificamos se o pai 2 na posicao i não está no filho, se não estiver, o toSearch recebe o pai2 na posicao i, e segue o flux
+                // Se estiver, repetou = true, vai quebrar o while, e a gente preenche os espaços VaZIOS de filho1, com a mesma posicao ado pai 2
+            }
+          }
+        }
+
+        //Prencher as posições vazias com o pai2
+        for( var k = 0; k < filho.length; k++ )
+        {
+          if ( !filho[k] ) {
+            filho[k] = pai2[k];
+          }
+        }
+
       }
 
     }
 
+    function buscarNoFilho( item, itens )
+    { 
+      var found = false;
+      for ( var k = 0; k < itens.length; k++ ) {
+        if ( itens[k] && itens[k].id == item.id ) {
+          found = true;
+          return k;
+        }
+      } 
+      if ( !found ) {
+        return -1;  
+      }
+    }
+
+    vm.isBom = function ( filho ) {
+      if (filho.weight < 30 && filho.fitness != 0 && filho.weight == 0){
+
+            console.log("Adicionouuu");
+
+            return true;
+      }
+      return false;
+    }
+
+    vm.reproduzir = function (){
+
+      vm.mochilasCopy = angular.copy(vm.mochilas);
+
+      for (var i = vm.mochilasCopy.length - 1; i > 0; i--) {    
+
+        var filhos = vm.cruzaCX(  vm.mochilasCopy[i]);
+
+        if( vm.isBom( filhos[0] ) && (filhos[0] != filhos[1]) ){
+          
+          vm.mochilas.push ( filhos[0] );
+        
+        }
+        if ( vm.isBom(filhos[1]) ){
+          vm.mochilas.push ( filhos[1] );
+        }
+      }
+
+    }
+
+    vm.tiraIguais = function( mochilas) {
+
+      tamanho = mochilas.length;
+
+      for (var i = tamanho - 1; i >= 10; i--) {
+    
+        if( mochilas[i].fitness == mochilas[i - 1].fitness || mochila.fitness == 0 ){
+           
+           mochilas.splice ( i , 1 );
+           vm.tiraIguais =+ 1;
+
+           console.log("Capou fora " + vm.tiraIguais);
+            
+           i--;
+
+        }
+    
+      }
+      return mochilas;
+    }
+
+    vm.contadorTiraIguais = 0;
+
     vm.melhor = vm.mochilas[0];
 
     vm.getMelhor();
+
+    vm.antigoMelhor = vm.melhor;
 
     vm.melhores.push( vm.mochilas[0] );
     
@@ -264,30 +353,29 @@ angular.module('todoApp', [])
 
     vm.break = 0;
 
-    while( vm.contador < 5 ){ 
+    while( vm.contador < 10 ){ 
 
           vm.reproduzir();
+          
           vm.mochilas = shellSort( vm.mochilas );
+
           vm.mochilas.splice( vm.numeroMochilas, vm.mochilas.length);
+
+          
           vm.getMelhor();
+
+          if( vm.antigoMelhor.fitness < vm.melhor.fitness || vm.melhores.weight > vm.maxWeigth ){
+            vm.contador = 0;
+          }else {
+            vm.contador += 1;
+          }
+
+          vm.antigoMelhor = vm.melhor;
 
           vm.melhores.push( vm.mochilas[0] );
 
           vm.break += 1; 
-  vm.contador += 1;
-          if ( true || vm.mochilas[0].fitness == vm.melhor.fitness ){
-
-           
-             
-          } else {
-
-              console.log("false = " + vm.mochilas[0].fitness  + " = " + vm.melhor.fitness );
-              vm.contador = 0;
-          }
-
-
-
-
+          
           console.log( vm.break + " - " + vm.contador);
 
     }
