@@ -272,6 +272,14 @@ angular.module('todoApp', [])
 
       }
 
+      filho = {
+        itens : filho
+      }
+
+
+  
+      return [ vm.getValue(filho) , vm.getValue( filho ) ];
+
     }
 
     function buscarNoFilho( item, itens )
