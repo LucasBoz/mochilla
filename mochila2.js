@@ -181,26 +181,26 @@ angular.module('todoApp', [])
       for (var j = meio1.length - 1; j >= 0; j--) {
       
         //PAI 1
-        var asd = pai1ParteA.map(function(e) { return e.item; }).indexOf( meio2[j].item );
+        var aux = pai1ParteA.map(function(e) { return e.item; }).indexOf( meio2[j].item );
 
-        if (asd > -1){
-            pai1ParteA.splice ( asd , 1 );
+        if (aux > -1){
+            pai1ParteA.splice ( aux , 1 );
         } 
         
-        asd =  pai1ParteB.map(function(e) { return e.item; }).indexOf( meio2[j].item );
-        if (asd > -1){
-             pai1ParteB.splice (asd  , 1 ); 
+        aux =  pai1ParteB.map(function(e) { return e.item; }).indexOf( meio2[j].item );
+        if (aux > -1){
+             pai1ParteB.splice (aux  , 1 ); 
         }
        
         //PAI 2
-         asd =   pai2ParteA.map(function(e) { return e.item; }).indexOf( meio1[j].item ) ;
-        if (asd > -1){
-            pai2ParteA.splice (asd , 1 );
+         aux =   pai2ParteA.map(function(e) { return e.item; }).indexOf( meio1[j].item ) ;
+        if (aux > -1){
+            pai2ParteA.splice (aux , 1 );
         }
        
-        asd =  pai2ParteB.map(function(e) { return e.item; }).indexOf( meio1[j].item );
-        if (asd > -1){
-            pai2ParteB.splice ( asd , 1 );
+        aux =  pai2ParteB.map(function(e) { return e.item; }).indexOf( meio1[j].item );
+        if (aux > -1){
+            pai2ParteB.splice ( aux , 1 );
         }
        
       }
